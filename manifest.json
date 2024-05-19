@@ -17,9 +17,6 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "developer": {
-    "name": "abdullah azhar khan"
-  },
   "manifest_version": 3,
   "action": {
     "default_popup": "popup.html",
