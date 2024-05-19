@@ -1,0 +1,28 @@
+{
+  "name": "REAL-FLEX",
+  "version": "0.0.1",
+  "description": "Shows summary of your grades",
+  "permissions": ["activeTab", "tabs", "scripting", "downloads", "storage"],
+  "host_permissions": [
+    "https://flexstudent.nu.edu.pk/Student/StudentMarks?*",
+    "https://flexstudent.nu.edu.pk/Student/Transcript?*",
+    "https://flexstudent.nu.edu.pk/?*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["libs/jspdf.umd.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "developer": {
+    "name": "abdullah azhar khan"
+  },
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon_512.png"
+  }
+}
