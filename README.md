@@ -34,7 +34,7 @@ The extension should now appear in your browser's extension bar.
 
 ## 📝 How to Use
 
-1. Go to the [FAST Flex Portal]([https://flex.nu.edu.pk/](https://flexstudent.nu.edu.pk/)).
+1. Go to the [FAST Flex Portal](https://flexstudent.nu.edu.pk/).
 2. Log in and navigate to the **Marks** tab.
 3. Click on the **What Flex Should Show** extension icon in your browser.
 4. Click the **"Fill the Table"** button.
