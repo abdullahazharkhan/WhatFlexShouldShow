@@ -46,3 +46,9 @@ You should now see a detailed breakdown of your marks and remaining evaluations.
 ## 📢 Disclaimer
 
 This extension is not officially affiliated with or endorsed by FAST-NUCES or the Flex Portal. Use it at your own discretion.
+
+---
+
+### Special Mention
+
+Special mention: [Wahaj Javed](https://github.com/wahajjaved20)'s [FlexMan](https://github.com/WahajJaved20/The-Amazing-Flex_Man)
