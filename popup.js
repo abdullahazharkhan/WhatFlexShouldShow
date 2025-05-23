@@ -81,6 +81,11 @@ function extractTextFromElements(htmlCode, selector) {
     return textData;
 }
 
+function diffOrTick(threshold, obtained) {
+    const diff = (threshold - obtained).toFixed(2);
+    return parseFloat(diff) < 0 ? "✅" : diff;
+}
+
 function makeResultArrays(tables, text) {
     const resultArrays = [];
     console.log(tables)
@@ -103,22 +108,23 @@ function makeResultArrays(tables, text) {
         const finalElement = element[element.length - 1];
         console.log(finalElement)
         if (finalElement[0] === "Total Marks") {
-            resultArrays.push(
-                [text[courseIndex],
+            resultArrays.push([
+                text[courseIndex],
                 totalMarks.toFixed(2),
                 obtainedMarks.toFixed(2),
-                (90 - obtainedMarks).toFixed(2),
-                (86 - obtainedMarks).toFixed(2),
-                (82 - obtainedMarks).toFixed(2),
-                (78 - obtainedMarks).toFixed(2),
-                (74 - obtainedMarks).toFixed(2),
-                (70 - obtainedMarks).toFixed(2),
-                (66 - obtainedMarks).toFixed(2),
-                (62 - obtainedMarks).toFixed(2),
-                (58 - obtainedMarks).toFixed(2),
-                (54 - obtainedMarks).toFixed(2),
-                (50 - obtainedMarks).toFixed(2),
-                averageMarks.toFixed(2)]);
+                averageMarks.toFixed(2),
+                diffOrTick(90, obtainedMarks),  // A+ (4.0)
+                diffOrTick(86, obtainedMarks),  // A  (4.0)
+                diffOrTick(82, obtainedMarks),  // A- (3.66)
+                diffOrTick(78, obtainedMarks),  // B+ (3.33)
+                diffOrTick(74, obtainedMarks),  // B  (3.0)
+                diffOrTick(70, obtainedMarks),  // B- (2.66)
+                diffOrTick(66, obtainedMarks),  // C+ (2.33)
+                diffOrTick(62, obtainedMarks),  // C  (2.0)
+                diffOrTick(58, obtainedMarks),  // C- (1.66)
+                diffOrTick(54, obtainedMarks),  // D+ (1.33)
+                diffOrTick(50, obtainedMarks),  // D  (1.0)
+            ]);
             totalMarks = 0;
             obtainedMarks = 0;
             averageMarks = 0;

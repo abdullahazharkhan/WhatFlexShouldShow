@@ -1,96 +1,197 @@
 <!DOCTYPE html>
-<style>
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  .fl-table {
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: normal;
-    border: none;
-    border-collapse: collapse;
-    width: 100%;
-    max-width: 100%;
-    white-space: nowrap;
-    background-color: white;
-  }
+<html lang="en">
 
-  .fl-table td,
-  .fl-table th {
-    text-align: center;
-    padding: 8px;
-  }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatFLEXShouldShow</title>
+  <style>
+    :root {
+      --primary-color: #482fb5;
+      --accent-color: #219af8;
+      --bg-light: rgb(10, 10, 10);
+      --text-dark: #fff;
+      --radius: 5px;
+      --spacing: 0.5rem;
+      --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-  .fl-table td {
-    border-right: 1px solid #f8f8f8;
-    font-size: 12px;
-  }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  .fl-table thead th {
-    color: #ffffff;
-    background: #00d0ff;
-  }
+    body {
+      font-family: var(--font-base);
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      padding: 1rem;
+    }
 
-  .fl-table thead th:nth-child(odd) {
-    color: #ffffff;
-    background: #324960;
-  }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      background-color: rgb(46, 46, 46, 0.5);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
 
-  .fl-table tr:nth-child(even) {
-    background: #f8f8f8;
-  }
+    .btn {
+      display: inline-block;
+      background-color: var(--accent-color);
+      color: #fff;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin: var(--spacing) 0;
+      transition: 200ms ease-in-out;
+    }
 
-  button {
-    background-color: #324960; /* Green */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    display: inline-block;
-    border-radius: 5px;
-    font-size: 18px;
-  }
-</style>
-<html>
-  <head>
-    <title>THE REAL FLEX</title>
-    <script src="popup.js" defer></script>
-  </head>
-  <body>
+    .btn:hover {
+      border-radius: 1px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-color) rgba(46, 46, 46, 0.5);
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+      background: rgba(46, 46, 46, 0.5);
+      border-radius: var(--radius);
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background-color: var(--accent-color);
+      border-radius: var(--radius);
+      border: 2px solid rgba(46, 46, 46, 0.5);
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb:hover {
+      background-color: var(--primary-color);
+    }
+
+    table {
+      table-layout: auto;
+      /* allow variable column widths */
+    }
+
+    /* Make the first column “sticky” */
+    thead th:first-child,
+    tbody td:first-child {
+      position: sticky;
+      left: 0;
+      /* stick to the left edge of the wrapper */
+      width: max-content;
+      /* size to fit the content */
+      white-space: nowrap;
+      /* don’t wrap the subject text */
+      background-color: rgb(46, 46, 46);
+      /* match row bg but semi-opaque so header shines through */
+      /* you may also use var(--bg-light) or a solid color to avoid seeing underlying cells */
+    }
+
+    /* Ensure header cell stays on top */
+    thead th:first-child {
+      z-index: 3;
+      /* highest so it sits above other headers and scrolling tds */
+    }
+
+    /* Make sure the body cells sit just below the header */
+    tbody td:first-child {
+      z-index: 2;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    thead th {
+      background: var(--accent-color);
+      color: #fff;
+      text-align: center;
+      padding: var(--spacing);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    thead th:nth-child() {
+      background: var(--bg-light);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--bg-light);
+    }
+
+    th,
+    td {
+      padding: var(--spacing);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      table {
+        min-width: 600px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
     <center>
-      <button
-        style="margin: 15px; margin-bottom: 20px; padding: 5px"
-        id="getHtmlButton"
-      >
-        Fill Table
-      </button>
+      <button id="getHtmlButton" class="btn">Fill Table</button>
     </center>
-    <table id="marksTable" class="fl-table">
-      <thead>
-        <tr>
-          <th>Subject</th>
-          <th>Total Marks</th>
-          <th>Marks Obtained</th>
-          <th>A+ (4.0 gpa)</th>
-          <th>A (4.0 gpa)</th>
-          <th>A- (3.66 gpa)</th>
-          <th>B+ (3.33 gpa)</th>
-          <th>B (3.0 gpa)</th>
-          <th>B- (2.66 gpa)</th>
-          <th>C+ (2.33 gpa)</th>
-          <th>C (2.0 gpa)</th>
-          <th>C- (1.66 gpa)</th>
-          <th>D+ (1.33 gpa)</th>
-          <th>D (1.0 gpa)</th>
-          <th>Average</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Table rows will be added dynamically here -->
-      </tbody>
-    </table>
-  </body>
+    <div class="table-wrapper">
+      <table id="marksTable">
+        <thead>
+          <tr>
+            <th style="background-color: var(--accent-color)">Subject</th>
+            <th>Total Marks</th>
+            <th>Marks Obtained</th>
+            <th>Average</th>
+            <th>A+ (4.0)</th>
+            <th>A (4.0)</th>
+            <th>A- (3.66)</th>
+            <th>B+ (3.33)</th>
+            <th>B (3.0)</th>
+            <th>B- (2.66)</th>
+            <th>C+ (2.33)</th>
+            <th>C (2.0)</th>
+            <th>C- (1.66)</th>
+            <th>D+ (1.33)</th>
+            <th>D (1.0)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamic rows go here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="popup.js" defer></script>
+</body>
+
 </html>

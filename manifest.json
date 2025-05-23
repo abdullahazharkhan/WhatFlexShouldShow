@@ -1,5 +1,5 @@
 {
-  "name": "REAL-FLEX",
+  "name": "WhatFLEXShouldShow",
   "version": "0.0.1",
   "description": "Shows summary of your grades",
   "permissions": ["activeTab", "tabs", "scripting", "downloads", "storage"],
