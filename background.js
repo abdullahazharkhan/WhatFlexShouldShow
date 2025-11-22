@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "getHTMLCode") {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const activeTab = tabs[0];
-            console.log(activeTab);
+            // console.log("active tab:",activeTab);
             chrome.scripting.executeScript(
                 {
                     target: { tabId: activeTab.id },

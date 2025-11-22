@@ -20,6 +20,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 function populateTable(results, text) {
     var tableBody = document.querySelector("#marksTable tbody");
+    // console.log("results",results)
+    // console.log("text",text)
     for (var i = 0; i < results.length; i++) {
         var row = document.createElement("tr");
         for (var j = 0; j < 15; j++) {
@@ -70,7 +72,7 @@ function extractTextFromElements(htmlCode, selector) {
     const textData = [];
 
     const doc = parser.parseFromString(htmlCode, "text/html");
-    console.log(doc)
+    // console.log("doc",doc)
     const elements = doc.querySelectorAll(selector);
     for (let index = 0; index < elements.length; index++) {
         const element = elements[index];
@@ -88,7 +90,7 @@ function diffOrTick(threshold, obtained) {
 
 function makeResultArrays(tables, text) {
     const resultArrays = [];
-    console.log(tables)
+    // console.log("tables", tables)
     let courseIndex = 0;
     let totalMarks = parseFloat("0");
     let obtainedMarks = parseFloat("0");
@@ -106,7 +108,7 @@ function makeResultArrays(tables, text) {
             averageMarks += ratio * weight;
         }
         const finalElement = element[element.length - 1];
-        console.log(finalElement)
+        // console.log("finalElement", finalElement)
         if (finalElement[0] === "Total Marks") {
             resultArrays.push([
                 text[courseIndex],
