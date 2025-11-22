@@ -1,36 +1,82 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var getHtmlButton = document.getElementById("getHtmlButton");
-    getHtmlButton.addEventListener("click", function () {
-        chrome.runtime.sendMessage({ action: "getHTMLCode" });
-    });
-})
-
-var activeTabData = "", newTabData = "";
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    if (message.action === "htmlCode") {
-        var htmlCode = message.data;
-        var tables = extractTables(htmlCode);
-        var selector = "#accordion"
-        const extractedText = extractTextFromElements(htmlCode, selector);
-        clearTableRows()
-        const results = makeResultArrays(tables, extractedText);
-        populateTable(results, extractedText)
+    const getHtmlButton = document.getElementById("getHtmlButton");
+    if (getHtmlButton) {
+        getHtmlButton.addEventListener("click", function () {
+            chrome.runtime.sendMessage({ action: "getHTMLCode" });
+        });
     }
 });
 
-function populateTable(results, text) {
-    var tableBody = document.querySelector("#marksTable tbody");
-    // console.log("results",results)
-    // console.log("text",text)
-    for (var i = 0; i < results.length; i++) {
-        var row = document.createElement("tr");
-        for (var j = 0; j < 15; j++) {
-            var cell = document.createElement("td");
-            cell.textContent = results[i][j];
-            row.appendChild(cell);
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    if (message.action === "htmlCode") {
+        try {
+            const htmlCode = message.data;
+            if (!htmlCode) {
+                console.error("No HTML code received");
+                return;
+            }
+            
+            const tables = extractTables(htmlCode);
+            const selector = "#accordion"; // Assuming this is the container for course names
+            const extractedText = extractTextFromElements(htmlCode, selector);
+            
+            clearTableRows();
+            
+            if (tables.length === 0) {
+                showEmptyState("No tables found. Please ensure you are on the Marks page.");
+                return;
+            }
+
+            const results = processCourseData(tables, extractedText);
+            populateTable(results);
+        } catch (error) {
+            console.error("Error processing data:", error);
+            showEmptyState("An error occurred while processing data.");
         }
+    }
+});
+
+function populateTable(results) {
+    const tableBody = document.querySelector("#marksTable tbody");
+    if (!tableBody) return;
+
+    // Remove empty state row if it exists
+    const emptyState = document.getElementById("emptyStateRow");
+    if (emptyState) emptyState.remove();
+
+    results.forEach(rowData => {
+        const row = document.createElement("tr");
+        
+        rowData.forEach((cellData, index) => {
+            const cell = document.createElement("td");
+            cell.textContent = cellData;
+            
+            // Add classes for styling specific columns
+            if (index >= 4) { // Grade columns
+                 cell.classList.add("status-number");
+                 if (cellData === "✅") {
+                     cell.classList.add("status-check");
+                 }
+            }
+            
+            row.appendChild(cell);
+        });
+        
         tableBody.appendChild(row);
-    };
+    });
+}
+
+function showEmptyState(message) {
+    const tableBody = document.querySelector("#marksTable tbody");
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = `
+        <tr id="emptyStateRow">
+            <td colspan="15" class="empty-state">
+                ${message}
+            </td>
+        </tr>
+    `;
 }
 
 function extractTables(htmlCode) {
@@ -63,85 +109,135 @@ function extractTables(htmlCode) {
 }
 
 function clearTableRows() {
-    var tableBody = document.querySelector("#marksTable tbody");
-    tableBody.innerHTML = "";
+    const tableBody = document.querySelector("#marksTable tbody");
+    if (tableBody) tableBody.innerHTML = "";
 }
 
 function extractTextFromElements(htmlCode, selector) {
     const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlCode, "text/html");
     const textData = [];
 
-    const doc = parser.parseFromString(htmlCode, "text/html");
-    // console.log("doc",doc)
     const elements = doc.querySelectorAll(selector);
-    for (let index = 0; index < elements.length; index++) {
-        const element = elements[index];
-        const ele = element.firstElementChild;
-        let text = ele.innerText;
-        textData.push(text);
-    }
+    elements.forEach(element => {
+        // Attempt to find the course name. 
+        // Based on original code: element.firstElementChild.innerText
+        // We'll be a bit more defensive.
+        const firstChild = element.firstElementChild;
+        if (firstChild) {
+            // Clean up the text (remove newlines, extra spaces)
+            let text = firstChild.innerText.replace(/\s+/g, ' ').trim();
+            textData.push(text);
+        } else {
+            textData.push("Unknown Course");
+        }
+    });
+    
     return textData;
 }
 
-function diffOrTick(threshold, obtained) {
-    const diff = (threshold - obtained).toFixed(2);
-    return parseFloat(diff) < 0 ? "✅" : diff;
+function calculateRequiredMarks(threshold, obtained) {
+    const diff = (threshold - obtained);
+    // If diff is negative, it means we already have more than the threshold
+    return diff <= 0 ? "✅" : diff.toFixed(2);
 }
 
-function makeResultArrays(tables, text) {
+function processCourseData(tables, courseNames) {
     const resultArrays = [];
-    // console.log("tables", tables)
     let courseIndex = 0;
-    let totalMarks = parseFloat("0");
-    let obtainedMarks = parseFloat("0");
-    let averageMarks = parseFloat("0");
-    for (let index = 0; index < tables.length; index++) {
-        const element = tables[index];
-        for (let insider = 1; insider < element.length - 1; insider++) {
-            let weight = parseFloat(element[insider][1]) ? parseFloat(element[insider][1]) : 0;
-            let marks = parseFloat(element[insider][3]) ? parseFloat(element[insider][3]) : 0;
-            let avg = parseFloat(element[insider][4]) ? parseFloat(element[insider][4]) : 0;
-            if (weight == 0 || marks == 0 || avg == 0) {
+    
+    // Accumulators for the current course
+    let totalMarks = 0;
+    let obtainedMarks = 0;
+    let averageMarks = 0;
+
+    tables.forEach((tableRows) => {
+        // Iterate through rows, skipping header (index 0) and potentially footer
+        // The original code started at index 1 and went to length - 1
+        
+        for (let i = 1; i < tableRows.length - 1; i++) {
+            const row = tableRows[i];
+            
+            // Ensure row has enough columns. Original code accessed indices 1, 3, 4.
+            // 0: Name?, 1: Weight/Total?, 2: ?, 3: Obtained?, 4: Average?
+            // Let's stick to the original logic but make it safe.
+            if (row.length < 5) continue;
+
+            let weight = parseFloat(row[1]) || 0;
+            let marks = parseFloat(row[3]) || 0;
+            let avg = parseFloat(row[4]) || 0;
+
+            if (weight === 0 || marks === 0 || avg === 0) {
                 continue;
             }
-            let ratio = parseFloat(avg / marks)
+
+            // Calculate weighted average contribution
+            // Ratio = Class Average / Total Marks for that assignment
+            // Contribution = Ratio * Weight
+            let ratio = avg / marks;
             averageMarks += ratio * weight;
         }
-        const finalElement = element[element.length - 1];
-        // console.log("finalElement", finalElement)
-        if (finalElement[0] === "Total Marks") {
+
+        const finalRow = tableRows[tableRows.length - 1];
+        if (!finalRow || finalRow.length < 3) return; // Skip if invalid
+
+        const firstCell = finalRow[0];
+
+        // Check if this is a summary row
+        if (firstCell === "Total Marks") {
+            const courseName = courseNames[courseIndex] || `Course ${courseIndex + 1}`;
+            
             resultArrays.push([
-                text[courseIndex],
+                courseName,
                 totalMarks.toFixed(2),
                 obtainedMarks.toFixed(2),
                 averageMarks.toFixed(2),
-                diffOrTick(90, obtainedMarks),  // A+ (4.0)
-                diffOrTick(86, obtainedMarks),  // A  (4.0)
-                diffOrTick(82, obtainedMarks),  // A- (3.66)
-                diffOrTick(78, obtainedMarks),  // B+ (3.33)
-                diffOrTick(74, obtainedMarks),  // B  (3.0)
-                diffOrTick(70, obtainedMarks),  // B- (2.66)
-                diffOrTick(66, obtainedMarks),  // C+ (2.33)
-                diffOrTick(62, obtainedMarks),  // C  (2.0)
-                diffOrTick(58, obtainedMarks),  // C- (1.66)
-                diffOrTick(54, obtainedMarks),  // D+ (1.33)
-                diffOrTick(50, obtainedMarks),  // D  (1.0)
+                calculateRequiredMarks(90, obtainedMarks),  // A+
+                calculateRequiredMarks(86, obtainedMarks),  // A
+                calculateRequiredMarks(82, obtainedMarks),  // A-
+                calculateRequiredMarks(78, obtainedMarks),  // B+
+                calculateRequiredMarks(74, obtainedMarks),  // B
+                calculateRequiredMarks(70, obtainedMarks),  // B-
+                calculateRequiredMarks(66, obtainedMarks),  // C+
+                calculateRequiredMarks(62, obtainedMarks),  // C
+                calculateRequiredMarks(58, obtainedMarks),  // C-
+                calculateRequiredMarks(54, obtainedMarks),  // D+
+                calculateRequiredMarks(50, obtainedMarks)   // D
             ]);
-            totalMarks = 0;
-            obtainedMarks = 0;
-            averageMarks = 0;
-            courseIndex++;
-        } else if (finalElement[0] === "100.00" || finalElement[0] === "99.00") {
-            resultArrays.push([text[courseIndex], finalElement[0], finalElement[1], finalElement[2]])
-            courseIndex++;
-            totalMarks = 0;
-            obtainedMarks = 0;
-            averageMarks = 0;
-        } else {
-            totalMarks += parseFloat(finalElement[1]);
-            obtainedMarks += parseFloat(finalElement[2]);
-        }
 
-    }
+            // Reset for next course
+            totalMarks = 0;
+            obtainedMarks = 0;
+            averageMarks = 0;
+            courseIndex++;
+        } 
+        // Handle cases where the table might be just a summary or different format?
+        // Original code had: else if (finalElement[0] === "100.00" || finalElement[0] === "99.00")
+        // This looks like a hack for specific edge cases. I'll keep it but clean it up.
+        else if (firstCell === "100.00" || firstCell === "99.00") {
+             const courseName = courseNames[courseIndex] || `Course ${courseIndex + 1}`;
+             // Assuming finalRow structure is [Total, Obtained, Average] or similar?
+             // Original: finalElement[0], finalElement[1], finalElement[2]
+             resultArrays.push([
+                 courseName, 
+                 firstCell, 
+                 finalRow[1] || "0", 
+                 finalRow[2] || "0",
+                 "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-" // No projection for this case
+             ]);
+             
+             courseIndex++;
+             totalMarks = 0;
+             obtainedMarks = 0;
+             averageMarks = 0;
+        } 
+        else {
+            // Accumulate totals from the final row of a sub-table (e.g. assignments, quizzes)
+            // Original: totalMarks += parseFloat(finalElement[1]); obtainedMarks += parseFloat(finalElement[2]);
+            totalMarks += parseFloat(finalRow[1]) || 0;
+            obtainedMarks += parseFloat(finalRow[2]) || 0;
+        }
+    });
+
     return resultArrays;
 }

@@ -7,13 +7,26 @@
   <title>WhatFLEXShouldShow</title>
   <style>
     :root {
-      --primary-color: #482fb5;
-      --accent-color: #219af8;
-      --bg-light: rgb(10, 10, 10);
-      --text-dark: #fff;
-      --radius: 5px;
-      --spacing: 0.5rem;
-      --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --primary-color: #6366f1;
+      /* Indigo 500 */
+      --primary-hover: #4f46e5;
+      /* Indigo 600 */
+      --bg-dark: #0f172a;
+      /* Slate 900 */
+      --bg-card: #1e293b;
+      /* Slate 800 */
+      --text-main: #f8fafc;
+      /* Slate 50 */
+      --text-muted: #94a3b8;
+      /* Slate 400 */
+      --border-color: #334155;
+      /* Slate 700 */
+      --success-color: #22c55e;
+      /* Green 500 */
+      --danger-color: #ef4444;
+      /* Red 500 */
+      --radius: 8px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
     * {
@@ -23,45 +36,84 @@
     }
 
     body {
-      font-family: var(--font-base);
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      padding: 1rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 1.5rem;
+      min-width: 600px;
+      /* Minimum width for the popup */
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 1rem;
-      background-color: rgb(46, 46, 46, 0.5);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-area img {
+      width: 32px;
+      height: 32px;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     .btn {
-      display: inline-block;
-      background-color: var(--accent-color);
-      color: #fff;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
       border: none;
       border-radius: var(--radius);
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background-color 0.2s ease;
-      margin: var(--spacing) 0;
-      transition: 200ms ease-in-out;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow);
     }
 
     .btn:hover {
-      border-radius: 1px;
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .table-container {
+      background-color: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .table-wrapper {
       overflow-x: auto;
-      margin-top: 1rem;
+      max-height: 500px;
+      /* Limit height for scrolling */
       scrollbar-width: thin;
-      scrollbar-color: var(--accent-color) rgba(46, 46, 46, 0.5);
+      scrollbar-color: var(--border-color) var(--bg-card);
     }
 
     .table-wrapper::-webkit-scrollbar {
@@ -70,125 +122,138 @@
     }
 
     .table-wrapper::-webkit-scrollbar-track {
-      background: rgba(46, 46, 46, 0.5);
-      border-radius: var(--radius);
+      background: var(--bg-card);
     }
 
     .table-wrapper::-webkit-scrollbar-thumb {
-      background-color: var(--accent-color);
-      border-radius: var(--radius);
-      border: 2px solid rgba(46, 46, 46, 0.5);
-    }
-
-    .table-wrapper::-webkit-scrollbar-thumb:hover {
-      background-color: var(--primary-color);
-    }
-
-    table {
-      table-layout: auto;
-      /* allow variable column widths */
-    }
-
-    /* Make the first column “sticky” */
-    thead th:first-child,
-    tbody td:first-child {
-      position: sticky;
-      left: 0;
-      /* stick to the left edge of the wrapper */
-      width: max-content;
-      /* size to fit the content */
-      white-space: nowrap;
-      /* don’t wrap the subject text */
-      background-color: rgb(46, 46, 46);
-      /* match row bg but semi-opaque so header shines through */
-      /* you may also use var(--bg-light) or a solid color to avoid seeing underlying cells */
-    }
-
-    /* Ensure header cell stays on top */
-    thead th:first-child {
-      z-index: 3;
-      /* highest so it sits above other headers and scrolling tds */
-    }
-
-    /* Make sure the body cells sit just below the header */
-    tbody td:first-child {
-      z-index: 2;
+      background-color: var(--border-color);
+      border-radius: 4px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 800px;
+      font-size: 0.875rem;
+      text-align: center;
     }
 
     thead th {
-      background: var(--accent-color);
-      color: #fff;
-      text-align: center;
-      padding: var(--spacing);
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 1rem;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 10;
+      box-shadow: 0 1px 0 var(--border-color);
     }
 
-    thead th:nth-child() {
-      background: var(--bg-light);
+    /* Sticky first column */
+    thead th:first-child,
+    tbody td:first-child {
+      position: sticky;
+      left: 0;
+      background-color: var(--bg-card);
+      z-index: 20;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-main);
+      border-right: 1px solid var(--border-color);
     }
 
-    tbody tr:nth-child(even) {
-      background-color: var(--bg-light);
+    thead th:first-child {
+      z-index: 30;
+      /* Higher than other headers */
     }
 
-    th,
-    td {
-      padding: var(--spacing);
-      text-align: center;
-      font-size: 0.9rem;
-    }
+    tbody td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
 
-    @media (max-width: 768px) {
-      .btn {
-        width: 100%;
+      /* Obtained */
+      tbody td:nth-child(4) {
+        /* Average */
+        color: var(--text-main);
+        font-weight: 500;
+      }
+
+      .status-check {
+        color: var(--success-color);
+        font-size: 1.1rem;
+      }
+
+      .status-number {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .empty-state {
+        padding: 3rem;
         text-align: center;
+        color: var(--text-muted);
       }
 
-      table {
-        min-width: 600px;
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
       }
-    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <center>
-      <button id="getHtmlButton" class="btn">Fill Table</button>
-    </center>
-    <div class="table-wrapper">
-      <table id="marksTable">
-        <thead>
-          <tr>
-            <th style="background-color: var(--accent-color)">Subject</th>
-            <th>Total Marks</th>
-            <th>Marks Obtained</th>
-            <th>Average</th>
-            <th>A+ (4.0)</th>
-            <th>A (4.0)</th>
-            <th>A- (3.66)</th>
-            <th>B+ (3.33)</th>
-            <th>B (3.0)</th>
-            <th>B- (2.66)</th>
-            <th>C+ (2.33)</th>
-            <th>C (2.0)</th>
-            <th>C- (1.66)</th>
-            <th>D+ (1.33)</th>
-            <th>D (1.0)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dynamic rows go here -->
-        </tbody>
-      </table>
+    <header>
+      <div class="logo-area">
+        <img src="logo.png" alt="Logo">
+        <h1>What Flex Should Show</h1>
+      </div>
+      <button id="getHtmlButton" class="btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right: 8px;">
+          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+        </svg>
+        Fill Table
+      </button>
+    </header>
+
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table id="marksTable">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Total</th>
+              <th>Obt</th>
+              <th>Avg</th>
+              <th>A+ (4.0)</th>
+              <th>A (4.0)</th>
+              <th>A- (3.66)</th>
+              <th>B+ (3.33)</th>
+              <th>B (3.0)</th>
+              <th>B- (2.66)</th>
+              <th>C+ (2.33)</th>
+              <th>C (2.0)</th>
+              <th>C- (1.66)</th>
+              <th>D+ (1.33)</th>
+              <th>D (1.0)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="emptyStateRow">
+              <td colspan="15" class="empty-state">
+                Click "Fill Table" to load your marks.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <script src="popup.js" defer></script>

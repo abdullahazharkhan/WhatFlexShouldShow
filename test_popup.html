@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatFLEXShouldShow - TEST</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            /* Indigo 500 */
+            --primary-hover: #4f46e5;
+            /* Indigo 600 */
+            --bg-dark: #0f172a;
+            /* Slate 900 */
+            --bg-card: #1e293b;
+            /* Slate 800 */
+            --text-main: #f8fafc;
+            /* Slate 50 */
+            --text-muted: #94a3b8;
+            /* Slate 400 */
+            --border-color: #334155;
+            /* Slate 700 */
+            --success-color: #22c55e;
+            /* Green 500 */
+            --danger-color: #ef4444;
+            /* Red 500 */
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 1.5rem;
+            min-width: 600px;
+            /* Minimum width for the popup */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-area img {
+            width: 32px;
+            height: 32px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .table-container {
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            /* Limit height for scrolling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) var(--bg-card);
+        }
+
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-card);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        thead th {
+            background-color: var(--bg-card);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 0 var(--border-color);
+        }
+
+        /* Sticky first column */
+        thead th:first-child,
+        tbody td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: var(--bg-card);
+            z-index: 20;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            border-right: 1px solid var(--border-color);
+        }
+
+        thead th:first-child {
+            z-index: 30;
+            /* Higher than other headers */
+        }
+
+        tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Highlight specific columns if needed */
+        tbody td:nth-child(2),
+        /* Total */
+        tbody td:nth-child(3),
+        /* Obtained */
+        tbody td:nth-child(4) {
+            /* Average */
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .status-check {
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+
+        .status-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+    <script>
+        const sampleHtml = `
+<div class="m-portlet m-portlet--brand m-portlet--head-solid-bg m-portlet--border-bottom-metal m-portlet--head-sm">
+    <div class="m-portlet__body">
+        <div class="tab-content">
+            <div class="tab-pane active" id="CL2005">
+                <div id="accordion">
+                    <h5>CL2005-Database Systems - Lab (BCS-5D)</h5>
+                    <div class="card">
+                        <div class="card-header" id="Lab Work">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#CL2005-Lab_Work"
+                                    aria-expanded="true" aria-controls="CL2005-Lab_Work">
+                                    Lab Work
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="CL2005-Lab_Work" class="collapse show" data-parent="#accordion"
+                            aria-labelledby="Lab Work">
+                            <div class="card-body">
+                                <table
+                                    class="sum_table table m-table m-table--head-bg-info table-bordered table-striped table-responsive"
+                                    width="100%">
+                                    <thead>
+                                        <tr class="titlerow">
+                                            <th class="text-center">Lab Work #</th>
+                                            <th class="text-center">Weightage</th>
+                                            <th class="text-center">Obtained Marks</th>
+                                            <th class="text-center">Total Marks</th>
+                                            <th class="text-center">Average</th>
+                                            <th class="text-center">Standard Deviation</th>
+                                            <th class="text-center">Minimum</th>
+                                            <th class="text-center">Maximum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 1</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.7</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 2</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.7</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 3</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.77</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 4</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.66</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 5</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.81</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 6</td>
+                                            <td class="text-center weightage">2 </td>
+                                            <td class="text-center ObtMarks">2 </td>
+                                            <td class="text-center GrandTotal">2</td>
+                                            <td class="text-center AverageMarks">1.89</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">2 </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="totalColumn_1464">
+                                            <td class="text-center">Total</td>
+                                            <td class="text-center totalColweightage">12</td>
+                                            <td class="text-center totalColObtMarks">12</td>
+                                            <td class="text-center totalColGrandTotal"></td>
+                                            <td class="text-center totalColAverageMarks"></td>
+                                            <td class="text-center totalColStdDev"></td>
+                                            <td class="text-center totalColMinMarks"></td>
+                                            <td class="text-center totalColMaxMarks"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="Midterm">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" data-toggle="collapse"
+                                    data-target="#CL2005-Midterm" aria-expanded="false" aria-controls="CL2005-Midterm">
+                                    Midterm
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="CL2005-Midterm" class="collapse" data-parent="#accordion" aria-labelledby="Midterm">
+                            <div class="card-body">
+                                <table
+                                    class="sum_table table m-table m-table--head-bg-info table-bordered table-striped table-responsive">
+                                    <thead>
+                                        <tr class="titlerow">
+                                            <th class="text-center">Midterm #</th>
+                                            <th class="text-center">Weightage</th>
+                                            <th class="text-center">Obtained Marks</th>
+                                            <th class="text-center">Total Marks</th>
+                                            <th class="text-center">Average</th>
+                                            <th class="text-center">Standard Deviation</th>
+                                            <th class="text-center">Minimum</th>
+                                            <th class="text-center">Maximum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 1</td>
+                                            <td class="text-center weightage">10 </td>
+                                            <td class="text-center ObtMarks">5.5</td>
+                                            <td class="text-center GrandTotal">10</td>
+                                            <td class="text-center AverageMarks">4.79</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">10 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 2</td>
+                                            <td class="text-center weightage">7.5 </td>
+                                            <td class="text-center ObtMarks">6.5</td>
+                                            <td class="text-center GrandTotal">7.5</td>
+                                            <td class="text-center AverageMarks">6.17</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">2 </td>
+                                            <td class="text-center MaxMarks">7 </td>
+                                        </tr>
+                                        <tr class="calculationrow">
+                                            <td class="text-center"> 3</td>
+                                            <td class="text-center weightage">7.5 </td>
+                                            <td class="text-center ObtMarks">7</td>
+                                            <td class="text-center GrandTotal">7.5</td>
+                                            <td class="text-center AverageMarks">5.26</td>
+                                            <td class="text-center StdDev"> </td>
+                                            <td class="text-center MinMarks">0 </td>
+                                            <td class="text-center MaxMarks">7.5 </td>
+                                        </tr>
+                                        <tr class="totalColumn_1464">
+                                            <td class="text-center">Total</td>
+                                            <td class="text-center totalColweightage">25</td>
+                                            <td class="text-center totalColObtMarks">19</td>
+                                            <td class="text-center totalColGrandTotal"></td>
+                                            <td class="text-center totalColAverageMarks"></td>
+                                            <td class="text-center totalColStdDev"></td>
+                                            <td class="text-center totalColMinMarks"></td>
+                                            <td class="text-center totalColMaxMarks"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="Grand Total Marks">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse"
+                                    data-target="#CL2005-Grand_Total_Marks" aria-expanded="false"
+                                    aria-controls="CL2005-Grand Total Marks" onclick="ftn_calculateMarks('1464')">
+                                    Grand Total Marks
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="CL2005-Grand_Total_Marks" class="collapse" data-parent="#accordion"
+                            aria-labelledby="Grand Total Marks">
+                            <div class="card-body">
+                                <table
+                                    class="sum_table table m-table m-table--head-bg-info table-bordered table-striped table-responsive"
+                                    width="100%">
+                                    <thead>
+                                        <tr class="titlerow">
+                                            <th class="text-center">Total Marks</th>
+                                            <th class="text-center">Obtained Marks</th>
+                                            <th class="text-center">Class Average</th>
+                                            <th class="text-center">Min</th>
+                                            <th class="text-center">Max</th>
+                                            <th class="text-center">Std Dev</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+        // Mock chrome.runtime
+        window.chrome = {
+            runtime: {
+                onMessage: {
+                    addListener: function (callback) {
+                        window.messageListener = callback;
+                        console.log("Listener registered");
+                    }
+                },
+                sendMessage: function (msg) {
+                    console.log("Message sent:", msg);
+                    if (msg.action === "getHTMLCode") {
+                        // Simulate receiving the HTML code
+                        setTimeout(() => {
+                            if (window.messageListener) {
+                                window.messageListener({
+                                    action: "htmlCode",
+                                    data: sampleHtml
+                                });
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <!-- <img src="logo.png" alt="Logo"> -->
+                <h1>What Flex Should Show (TEST)</h1>
+            </div>
+            <button id="getHtmlButton" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="margin-right: 8px;">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                </svg>
+                Fill Table
+            </button>
+        </header>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="marksTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total</th>
+                            <th>Obt</th>
+                            <th>Avg</th>
+                            <th>A+ (4.0)</th>
+                            <th>A (4.0)</th>
+                            <th>A- (3.66)</th>
+                            <th>B+ (3.33)</th>
+                            <th>B (3.0)</th>
+                            <th>B- (2.66)</th>
+                            <th>C+ (2.33)</th>
+                            <th>C (2.0)</th>
+                            <th>C- (1.66)</th>
+                            <th>D+ (1.33)</th>
+                            <th>D (1.0)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="emptyStateRow">
+                            <td colspan="15" class="empty-state">
+                                Click "Fill Table" to load your marks.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
